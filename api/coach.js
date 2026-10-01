@@ -1,5 +1,5 @@
 // api/coach.js - Vercel Serverless Function
-// Free Tier: 100k invocations/month | Gemini 1.5 Flash Free Tier: 15 RPM, 1500 RPD
+// Free Tier: 100k invocations/month | Gemini 2.5 Flash Lite Free Tier: 15 RPM, 1500 RPD
 // Keeps the entire backend $0 for you while paying subscribers access your Gemini key safely.
 
 const REVENUECAT_SECRET_KEY = process.env.REVENUECAT_SECRET_KEY;
@@ -57,9 +57,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Field "text" is required.' });
   }
 
-  // 5. Query Google Gemini 1.5 Flash
+  // 5. Query Google Gemini Flash Lite
   try {
-    const aiResponse = await callGeminiFlash({ mode, text, conversationHistory });
+    const aiResponse = await callGeminiFlashLite({ mode, text, conversationHistory });
     return res.status(200).json(aiResponse);
   } catch (error) {
     console.error('Gemini API Error:', error);
@@ -85,7 +85,7 @@ async function verifyRevenueCatPro(appUserId) {
     }
 
     const data = await response.json();
-    const proEntitlement = data.subscriber?.entitlements?.pro;
+    const proEntitlement = data.subscriber?.entitlements?.easy_english_pro || data.subscriber?.entitlements?.pro;
 
     if (!proEntitlement) return false;
 
@@ -108,8 +108,7 @@ async function verifyRevenueCatPro(appUserId) {
  */
 async function checkAndIncrementQuota(appUserId) {
   const dateKey = new Date().toISOString().split('T')[0];
-  const redisKey = `quota:${appUserId}:${dateKey}`;
-
+  const redisKey = `quota:${appUserId}:${dateKey}`;\n
   try {
     const res = await fetch(`${UPSTASH_URL}/pipeline`, {
       method: 'POST',
@@ -133,18 +132,19 @@ async function checkAndIncrementQuota(appUserId) {
 }
 
 /**
- * Calls Gemini 1.5 Flash using REST API
+ * Calls Gemini Flash Lite using Google Generative Language REST API
+ * Upgraded to Gemini 2.5 Flash Lite
  */
-async function callGeminiFlash({ mode, text, conversationHistory = [] }) {
+async function callGeminiFlashLite({ mode, text, conversationHistory = [] }) {
   const systemInstruction = `You are EasyEnglish Coach, an encouraging, native English speaking conversational coach. 
-Analyze the learner's utterance. 
+Analyze the learner's speech/caption utterance. 
 Return a JSON response with:
 1. "correctedText": The natural, grammatically correct version (or same if already perfect).
 2. "feedback": A 1-2 sentence tip explaining any grammar or vocabulary improvement (empty if perfect).
 3. "reply": A friendly, natural conversational reply (under 25 words) to keep the conversation flowing.
 Always output pure JSON.`;
 
-  const prompt = `Learner said: "${text}". Mode: ${mode || 'conversation'}`;
+  const prompt = `Learner caption: "${text}". Mode: ${mode || 'conversation'}`;
 
   const requestBody = {
     contents: [
@@ -164,25 +164,42 @@ Always output pure JSON.`;
     }
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    }
-  );
+  // Primary model: gemini-2.5-flash-lite, fallback: gemini-1.5-flash
+  const models = ['gemini-2.5-flash-lite', 'gemini-1.5-flash'];
+  let lastErr = null;
 
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  
-  try {
-    return JSON.parse(rawText);
-  } catch {
-    return {
-      correctedText: text,
-      feedback: "",
-      reply: rawText || "Great job! Let's keep practicing."
-    };
+  for (const model of models) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawText) {
+          try {
+            return JSON.parse(rawText);
+          } catch {
+            return {
+              correctedText: text,
+              feedback: "",
+              reply: rawText || "Great job! Let's keep practicing."
+            };
+          }
+        }
+      } else {
+        lastErr = new Error(`Model ${model} returned ${response.status}`);
+      }
+    } catch (err) {
+      lastErr = err;
+    }
   }
+
+  throw lastErr || new Error('Failed to query Gemini model');
 }

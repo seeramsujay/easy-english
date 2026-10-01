@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/ai_coach_message.dart';
 import '../../providers/ai_coach_provider.dart';
+import '../../services/live_captions_simulator.dart';
 import '../../../paywall/presentation/screens/paywall_screen.dart';
 
 class AiCoachScreen extends ConsumerStatefulWidget {
@@ -14,6 +16,11 @@ class AiCoachScreen extends ConsumerStatefulWidget {
 class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final LiveCaptionsAudioSimulator _captionSimulator = LiveCaptionsAudioSimulator();
+
+  StreamSubscription<LiveCaptionSegment>? _captionSubscription;
+  String _liveCaptionText = '';
+  bool _isLiveCapturing = false;
 
   final List<String> _quickTopics = const [
     '☕ Ordering Coffee',
@@ -24,7 +31,21 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _captionSubscription = _captionSimulator.captionStream.listen((segment) {
+      if (mounted) {
+        setState(() {
+          _liveCaptionText = segment.text;
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _captionSubscription?.cancel();
+    _captionSimulator.dispose();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -42,17 +63,54 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
     });
   }
 
+  void _toggleLiveCaptions() {
+    if (_isLiveCapturing) {
+      _captionSimulator.stopListening();
+      setState(() {
+        _isLiveCapturing = false;
+        _liveCaptionText = '';
+      });
+    } else {
+      setState(() {
+        _isLiveCapturing = true;
+        _liveCaptionText = 'Listening to speech...';
+      });
+
+      _captionSimulator.startSimulatedListening(
+        onFinalResult: (finalText) {
+          if (mounted) {
+            setState(() {
+              _isLiveCapturing = false;
+              _liveCaptionText = '';
+            });
+            ref.read(aiCoachNotifierProvider.notifier).sendMessage(finalText);
+            _scrollToBottom();
+          }
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final aiState = ref.watch(aiCoachNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.smart_toy_outlined, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Gemini AI Coach'),
+            Row(
+              children: [
+                Icon(Icons.smart_toy_outlined, color: Colors.blue, size: 20),
+                SizedBox(width: 6),
+                Text('Gemini AI Coach', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            Text(
+              'Powered by Gemini 2.5 Flash Lite • Live Captions',
+              style: TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ],
         ),
         actions: [
@@ -91,6 +149,78 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
             ),
 
             const Divider(height: 1),
+
+            // Live Caption Banner (Google Live Captions simulator)
+            if (_isLiveCapturing || _liveCaptionText.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade900,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.graphic_eq, color: Colors.cyanAccent, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Text(
+                                'GOOGLE LIVE CAPTIONS (SPEECH-TO-TEXT)',
+                                style: TextStyle(
+                                  color: Colors.cyanAccent,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              SizedBox(
+                                width: 8,
+                                height: 8,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: Colors.cyanAccent,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _liveCaptionText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white70, size: 18),
+                      onPressed: () {
+                        _captionSimulator.stopListening();
+                        setState(() {
+                          _isLiveCapturing = false;
+                          _liveCaptionText = '';
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
 
             // Error banner if any (e.g. Quota or Entitlement needed)
             if (aiState.error != null)
@@ -151,14 +281,14 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'AI Coach is thinking...',
+                      'Gemini 2.5 Flash Lite is thinking...',
                       style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                     ),
                   ],
                 ),
               ),
 
-            // Input Bar
+            // Input Bar with Google Live Captions Mic Button
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -167,12 +297,25 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
               ),
               child: Row(
                 children: [
+                  // Live Captions simulated speech button
+                  IconButton.filledTonal(
+                    tooltip: 'Speak with Live Captions',
+                    onPressed: aiState.isLoading ? null : _toggleLiveCaptions,
+                    style: IconButton.styleFrom(
+                      backgroundColor: _isLiveCapturing ? Colors.red.shade100 : Colors.blue.shade50,
+                    ),
+                    icon: Icon(
+                      _isLiveCapturing ? Icons.mic_off : Icons.mic,
+                      color: _isLiveCapturing ? Colors.red : Colors.blue.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: _textController,
                       textCapitalization: TextCapitalization.sentences,
                       decoration: InputDecoration(
-                        hintText: 'Type in English...',
+                        hintText: 'Type or tap mic for Live Captions...',
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 10,
@@ -227,9 +370,26 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
               bottomRight: Radius.circular(16),
             ),
           ),
-          child: Text(
-            message.text,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                message.text,
+                style: const TextStyle(color: Colors.white, fontSize: 15),
+              ),
+              const SizedBox(height: 3),
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.closed_caption_outlined, size: 12, color: Colors.white70),
+                  SizedBox(width: 3),
+                  Text(
+                    'Live Captions',
+                    style: TextStyle(color: Colors.white70, fontSize: 10),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       );
@@ -255,9 +415,26 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   bottomRight: Radius.circular(16),
                 ),
               ),
-              child: Text(
-                message.text,
-                style: const TextStyle(fontSize: 15, color: Colors.black87),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.bolt, size: 12, color: Colors.blue.shade700),
+                      const SizedBox(width: 3),
+                      Text(
+                        'Gemini 2.5 Flash Lite',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue.shade700),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    message.text,
+                    style: const TextStyle(fontSize: 15, color: Colors.black87),
+                  ),
+                ],
               ),
             ),
 
