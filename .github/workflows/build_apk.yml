@@ -20,10 +20,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Pre-install Android CMake & NDK Tools
+      - name: Pre-install Android CMake & NDK via Android SDK Commandline Tools
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "cmake;3.22.1" "ndk;25.1.8937393"
+          ANDROID_SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -f "$SDKMANAGER" ]; then
+            SDKMANAGER=$(find "$ANDROID_SDK_ROOT" -name sdkmanager | head -n 1)
+          fi
+          echo "Using sdkmanager at: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "cmake;3.22.1" "ndk;25.1.8937393"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
