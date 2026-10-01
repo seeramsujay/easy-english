@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'core/services/revenuecat_service.dart';
 import 'features/ai_coach/presentation/screens/ai_coach_screen.dart';
+import 'features/call/presentation/screens/call_screen.dart';
 import 'features/paywall/presentation/screens/paywall_screen.dart';
 import 'features/paywall/providers/subscription_provider.dart';
 
@@ -150,8 +151,10 @@ class HomeScreen extends ConsumerWidget {
                 badgeText: 'FREE',
                 badgeColor: Colors.green,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('P2P Matchmaking Room initialized.')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const CallScreen(peerName: 'Elena from Madrid'),
+                    ),
                   );
                 },
               ),
