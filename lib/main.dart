@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'core/services/revenuecat_service.dart';
+import 'features/ai_coach/presentation/screens/ai_coach_screen.dart';
 import 'features/paywall/presentation/screens/paywall_screen.dart';
 import 'features/paywall/providers/subscription_provider.dart';
 
@@ -167,11 +168,11 @@ class HomeScreen extends ConsumerWidget {
                 badgeColor: Colors.amber.shade800,
                 onTap: () async {
                   if (isPro) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Starting Gemini AI Coach session...')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AiCoachScreen()),
                     );
                   } else {
-                    // Try presenting RevenueCat remote native paywall first
+                    // Present RevenueCat dynamic Paywall if not pro
                     final result = await RevenueCatService.presentPaywallIfNeeded();
                     if (result == PaywallResult.notPresented && context.mounted) {
                       Navigator.of(context).push(
