@@ -44,8 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Local Android SDK and tools
+# Local Android SDK, binaries, and tools
 android-sdk/
+apk_output/
+*.apk
+*.aab
 .gradle/
 local.properties
 
