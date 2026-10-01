@@ -13,7 +13,7 @@ void main() {
 
     // Verify Welcome header is present
     expect(find.text('Welcome to EasyEnglish!'), findsOneWidget);
-    expect(find.text('CHOOSE YOUR REGION'), findsOneWidget);
+    expect(find.text('SELECT REGIONAL ROOM'), findsOneWidget);
 
     // Verify India is displayed in region list
     expect(find.text('India'), findsOneWidget);

@@ -9,8 +9,6 @@ import 'features/paywall/providers/subscription_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize RevenueCat SDK with the provided API Key
   await RevenueCatService.initialize();
 
   runApp(
@@ -28,22 +26,66 @@ class EasyEnglishApp extends StatelessWidget {
     return MaterialApp(
       title: 'EasyEnglish',
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.system,
       theme: ThemeData(
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF58CC02), // Duolingo green
-          primary: const Color(0xFF58CC02),
+          seedColor: const Color(0xFF10B981), // Emerald Teal
+          primary: const Color(0xFF059669),
+          secondary: const Color(0xFF0284C7),
+          surface: const Color(0xFFF8FAFC),
+          surfaceContainerLowest: Colors.white,
           brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: const Color(0xFFF7F7F7),
+        scaffoldBackgroundColor: const Color(0xFFF1F5F9),
+        cardTheme: const CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(24)),
+            side: BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+          ),
+          color: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          scrolledUnderElevation: 1,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          centerTitle: false,
+        ),
+      ),
+      darkTheme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF10B981),
+          primary: const Color(0xFF34D399),
+          secondary: const Color(0xFF38BDF8),
+          surface: const Color(0xFF0F172A),
+          surfaceContainerLowest: const Color(0xFF1E293B),
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF0B0F19),
+        cardTheme: const CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(24)),
+            side: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          ),
+          color: Color(0xFF131C2E),
+        ),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          scrolledUnderElevation: 1,
+          backgroundColor: Color(0xFF0F172A),
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
       home: const WelcomeOnboardingScreen(),
     );
   }
 }
 
-/// Duolingo-inspired clean Welcome & Location selector
+/// Material 3 Duolingo-styled Onboarding & Location Selector
 class WelcomeOnboardingScreen extends StatefulWidget {
   const WelcomeOnboardingScreen({super.key});
 
@@ -65,67 +107,84 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 16),
-              // Duolingo style friendly Mascot / Header
+              const SizedBox(height: 12),
+              // App Brand Header Icon
               Center(
                 child: Container(
-                  width: 80,
-                  height: 80,
+                  width: 88,
+                  height: 88,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF58CC02).withValues(alpha: 0.15),
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.primary.withValues(alpha: 0.2),
+                        colorScheme.secondary.withValues(alpha: 0.2),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Text('🦉', style: TextStyle(fontSize: 44)),
+                  child: Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Image.asset(
+                        'assets/images/app_logo.jpg',
+                        width: 68,
+                        height: 68,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Text(
+                          '🎙️',
+                          style: TextStyle(fontSize: 40, color: colorScheme.primary),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              const Text(
+              Text(
                 'Welcome to EasyEnglish!',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 26,
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF4B4B4B),
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Speak real English with real learners over pure audio.\nWhere are you practicing from today?',
+              Text(
+                'Practice spoken English with peer learners worldwide over pure, low-latency audio.\nWhere are you dialing in from?',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF777777),
-                  height: 1.4,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.45,
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
 
-              // Country Picker Section Header
-              const Text(
-                'CHOOSE YOUR REGION',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFFAFAFAF),
+              // Region Header
+              Text(
+                'SELECT REGIONAL ROOM',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
+                  color: colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 10),
 
-              // Region list showing active online learners
+              // Region Cards List
               Expanded(
                 child: ListView.separated(
                   itemCount: _countries.length,
@@ -135,25 +194,30 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                     final isSelected = _selectedCountry == item['name'];
 
                     return InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       onTap: () {
                         setState(() {
                           _selectedCountry = item['name'] as String;
                         });
                       },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          color: isSelected
+                              ? colorScheme.primaryContainer.withValues(alpha: 0.35)
+                              : colorScheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSelected ? const Color(0xFF58CC02) : const Color(0xFFE5E5E5),
-                            width: isSelected ? 2.5 : 1.5,
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.outlineVariant.withValues(alpha: 0.6),
+                            width: isSelected ? 2.2 : 1.2,
                           ),
                         ),
                         child: Row(
                           children: [
-                            Text(item['flag'] as String, style: const TextStyle(fontSize: 26)),
+                            Text(item['flag'] as String, style: const TextStyle(fontSize: 28)),
                             const SizedBox(width: 14),
                             Expanded(
                               child: Column(
@@ -163,21 +227,19 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                                     children: [
                                       Text(
                                         (item['name'] as String).split(' ')[0],
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF4B4B4B),
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                       if (item['recommended'] == true) ...[
                                         const SizedBox(width: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
+                                            horizontal: 7,
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF58CC02),
+                                            color: colorScheme.primary,
                                             borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: const Text(
@@ -198,17 +260,16 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                                       Container(
                                         width: 8,
                                         height: 8,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF58CC02),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primary,
                                           shape: BoxShape.circle,
                                         ),
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
                                         '${item['onlineCount']} learners online right now',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF777777),
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                     ],
@@ -217,8 +278,8 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                               ),
                             ),
                             Icon(
-                              isSelected ? Icons.check_circle : Icons.circle_outlined,
-                              color: isSelected ? const Color(0xFF58CC02) : const Color(0xFFCCCCCC),
+                              isSelected ? Icons.check_circle_rounded : Icons.radio_button_off_rounded,
+                              color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
                             ),
                           ],
                         ),
@@ -230,17 +291,15 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
 
               const SizedBox(height: 16),
 
-              // Duolingo-style 3D Chunky Action Button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF58CC02),
-                  foregroundColor: Colors.white,
+              // Material 3 Filled Action Button
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  elevation: 0,
-                  shadowColor: const Color(0xFF46A302),
                 ),
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
@@ -249,7 +308,8 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                     ),
                   );
                 },
-                child: const Text(
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text(
                   'CONTINUE TO PRACTICE',
                   style: TextStyle(
                     fontSize: 16,
@@ -258,7 +318,7 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -278,43 +338,41 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isPro = ref.watch(isProUserProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    // Online learners count based on region
     final onlineCount = selectedRegion.contains('India') ? '1,420' : '650';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFF58CC02).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
               ),
-              child: const Text('🦉', style: TextStyle(fontSize: 18)),
+              child: Icon(Icons.record_voice_over_rounded, color: colorScheme.primary, size: 20),
             ),
-            const SizedBox(width: 8),
-            const Text(
+            const SizedBox(width: 10),
+            Text(
               'EasyEnglish',
-              style: TextStyle(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF4B4B4B),
-                fontSize: 20,
+                letterSpacing: -0.4,
               ),
             ),
           ],
         ),
         actions: [
-          // Region pill
+          // Active Region Badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0F0F0),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -322,18 +380,16 @@ class HomeScreen extends ConsumerWidget {
                 Container(
                   width: 7,
                   height: 7,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF58CC02),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   selectedRegion,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF4B4B4B),
                   ),
                 ),
               ],
@@ -342,7 +398,7 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           IconButton(
             tooltip: 'Subscription & Customer Center',
-            icon: const Icon(Icons.account_circle_outlined, color: Color(0xFF4B4B4B)),
+            icon: const Icon(Icons.account_circle_outlined),
             onPressed: () {
               RevenueCatService.presentCustomerCenter();
             },
@@ -356,46 +412,61 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Duolingo-style Streak & Online HUD Card
+              // Material 3 Speaking HUD Card
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE5E5E5), width: 1.5),
+                  color: colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildHudItem('🔥', '3 DAYS', 'Speaking Streak'),
-                    Container(height: 36, width: 1, color: const Color(0xFFE5E5E5)),
-                    _buildHudItem('🟢', '$onlineCount ONLINE', 'Learners in $selectedRegion'),
-                    Container(height: 36, width: 1, color: const Color(0xFFE5E5E5)),
-                    _buildHudItem(isPro ? '👑' : '⭐', isPro ? 'PRO' : 'FREE', 'Account Status'),
+                    _buildHudItem(context, '🔥', '3 DAYS', 'Speaking Streak'),
+                    Container(height: 38, width: 1, color: colorScheme.outlineVariant.withValues(alpha: 0.6)),
+                    _buildHudItem(context, '🟢', '$onlineCount ONLINE', 'In $selectedRegion'),
+                    Container(height: 38, width: 1, color: colorScheme.outlineVariant.withValues(alpha: 0.6)),
+                    _buildHudItem(context, isPro ? '👑' : '⭐', isPro ? 'PRO' : 'FREE', 'Account Tier'),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
               // Membership Banner Card
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: isPro ? const Color(0xFFFFF9E6) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: isPro
+                      ? LinearGradient(
+                          colors: [
+                            const Color(0xFFFEF3C7),
+                            const Color(0xFFFDE68A).withValues(alpha: 0.4),
+                          ],
+                        )
+                      : null,
+                  color: isPro ? null : colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: isPro ? const Color(0xFFFFC107) : const Color(0xFFE5E5E5),
-                    width: isPro ? 2 : 1.5,
+                    color: isPro ? const Color(0xFFF59E0B) : colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    width: isPro ? 2 : 1,
                   ),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 22,
-                      backgroundColor: isPro ? const Color(0xFFFFC107) : const Color(0xFF58CC02),
-                      foregroundColor: Colors.white,
-                      child: Icon(isPro ? Icons.star : Icons.headset),
+                      radius: 24,
+                      backgroundColor: isPro ? const Color(0xFFF59E0B) : colorScheme.primaryContainer,
+                      foregroundColor: isPro ? Colors.white : colorScheme.primary,
+                      child: Icon(isPro ? Icons.star_rounded : Icons.headset_mic_rounded, size: 26),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -404,34 +475,30 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           Text(
                             isPro ? 'EasyEnglish Pro Active' : 'Free Audio Learner',
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF4B4B4B),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             isPro
-                                ? 'Unlimited Gemini 2.5 Flash Lite Coach & Grammar'
+                                ? 'Unlimited Gemini 2.5 Flash Lite Coach & Live Captions'
                                 : '100% Free P2P Pure Audio matchmaking included',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF777777),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
                     if (!isPro)
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF58CC02),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      FilledButton.tonal(
+                        style: ButtonStyle(
+                          shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          padding: const WidgetStatePropertyAll(
+                            EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           ),
                         ),
                         onPressed: () {
@@ -445,29 +512,27 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 26),
 
-              const Text(
-                'CHOOSE PRACTICE MODE',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFFAFAFAF),
+              Text(
+                'PRACTICE MODES',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
+                  color: colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 12),
 
-              // Feature 1: Pure Audio 1-on-1 P2P Practice
-              _buildDuolingoModeCard(
+              // Feature 1: Pure Audio 1-on-1 P2P Room
+              _buildPracticeCard(
                 context,
-                emoji: '🎧',
+                icon: Icons.graphic_eq_rounded,
+                iconColor: colorScheme.primary,
                 title: 'Live 1-on-1 Audio Room',
-                subtitle: 'Match with active learners in $selectedRegion for pure audio conversations. Zero camera pressure.',
+                subtitle: 'Match with active learners in $selectedRegion for low-latency conversations. Pure audio, zero video.',
                 badge: '100% FREE',
-                badgeBg: const Color(0xFFE8F5E9),
-                badgeTextColor: const Color(0xFF2E7D32),
-                borderColor: const Color(0xFF58CC02),
+                badgeColor: colorScheme.primary,
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -483,15 +548,14 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 14),
 
               // Feature 2: Gemini 2.5 Flash Lite Speaking Coach
-              _buildDuolingoModeCard(
+              _buildPracticeCard(
                 context,
-                emoji: '🤖',
+                icon: Icons.psychology_rounded,
+                iconColor: colorScheme.secondary,
                 title: 'Gemini 2.5 AI Coach',
-                subtitle: 'Practice with our AI speaking tutor using Google Live Captions with instant grammar corrections.',
+                subtitle: 'Practice with our AI tutor using Google Live Captions with real-time grammar feedback cards.',
                 badge: 'PRO UNLOCKED',
-                badgeBg: const Color(0xFFFFF3E0),
-                badgeTextColor: const Color(0xFFE65100),
-                borderColor: const Color(0xFFFF9800),
+                badgeColor: const Color(0xFFF59E0B),
                 onTap: () async {
                   if (isPro) {
                     Navigator.of(context).push(
@@ -510,38 +574,36 @@ class HomeScreen extends ConsumerWidget {
 
               const SizedBox(height: 28),
 
-              // Bottom utility navigation buttons
+              // Bottom Account Navigation Actions
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        side: const BorderSide(color: Color(0xFFE5E5E5)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(builder: (_) => const PaywallScreen()),
                         );
                       },
-                      icon: const Icon(Icons.credit_card_outlined, color: Color(0xFF4B4B4B)),
-                      label: const Text('Plans & Pricing', style: TextStyle(color: Color(0xFF4B4B4B))),
+                      icon: const Icon(Icons.credit_card_outlined),
+                      label: const Text('Plans & Pricing'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        side: const BorderSide(color: Color(0xFFE5E5E5)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: () {
                         RevenueCatService.presentCustomerCenter();
                       },
-                      icon: const Icon(Icons.manage_accounts_outlined, color: Color(0xFF4B4B4B)),
-                      label: const Text('My Account', style: TextStyle(color: Color(0xFF4B4B4B))),
+                      icon: const Icon(Icons.manage_accounts_outlined),
+                      label: const Text('My Account'),
                     ),
                   ),
                 ],
@@ -553,109 +615,105 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHudItem(String emoji, String title, String subtitle) {
+  Widget _buildHudItem(BuildContext context, String emoji, String title, String subtitle) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Text(emoji, style: const TextStyle(fontSize: 22)),
         const SizedBox(height: 4),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 13,
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w900,
-            color: Color(0xFF4B4B4B),
           ),
         ),
         Text(
           subtitle,
-          style: const TextStyle(fontSize: 10, color: Color(0xFF777777)),
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 10,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildDuolingoModeCard(
+  Widget _buildPracticeCard(
     BuildContext context, {
-    required String emoji,
+    required IconData icon,
+    required Color iconColor,
     required String title,
     required String subtitle,
     required String badge,
-    required Color badgeBg,
-    required Color badgeTextColor,
-    required Color borderColor,
+    required Color badgeColor,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE5E5E5), width: 1.5),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: borderColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(16),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(icon, color: iconColor, size: 28),
               ),
-              child: Center(
-                child: Text(emoji, style: const TextStyle(fontSize: 26)),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF4B4B4B),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: badgeBg,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          badge,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: badgeTextColor,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            badge,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: badgeColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF777777),
-                      height: 1.35,
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
