@@ -44,5 +44,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Local Android SDK and tools
+android-sdk/
+.gradle/
+local.properties
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+
 # Widget Preview related
 .widget_preview/
