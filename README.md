@@ -1,14 +1,21 @@
-# 🌍 EasyEnglish
+<p align="center">
+  <img src="assets/logo.svg" alt="EasyEnglish Logo" width="130" height="130" />
+</p>
 
-> **Serverless, End-to-End Encrypted Peer-to-Peer Language Learning with Zero-Cost Gemini AI Coaching**  
-> *Built with Flutter & Powered by RevenueCat for the Shipaton 2026 Hackathon.*
+<h1 align="center">EasyEnglish</h1>
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![WebRTC](https://img.shields.io/badge/WebRTC-P2P_E2EE-333333?logo=webrtc&logoColor=white)](https://webrtc.org/)
-[![RevenueCat](https://img.shields.io/badge/RevenueCat-In--App_Purchases-E84E36?logo=revenuecat&logoColor=white)](https://www.revenuecat.com/)
-[![Google Gemini](https://img.shields.io/badge/Google_Gemini-1.5_Flash-8E75B2?logo=google&logoColor=white)](https://ai.google.dev/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Samsung-green.svg)](#)
+<p align="center">
+  <strong>Serverless, End-to-End Encrypted Peer-to-Peer Language Learning with Zero-Cost Gemini AI Coaching (Flutter)</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter" alt="Flutter" />
+  <img src="https://img.shields.io/badge/WebRTC-P2P%20E2EE-333333?style=flat-square&logo=webrtc" alt="WebRTC" />
+  <img src="https://img.shields.io/badge/AI-Gemini%20Flash-8E75B2?style=flat-square&logo=google" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Monetization-RevenueCat-E84E36?style=flat-square" alt="RevenueCat" />
+  <img src="https://img.shields.io/badge/Status-Maintained-success?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
+</p>
 
 ---
 
